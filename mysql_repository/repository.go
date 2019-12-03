@@ -18,7 +18,7 @@ func NewMysqlRepo(host, port, user, pass, dbName string) (*MysqlRepo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &MysqlRepo{mysqlConn:db}, nil
+	return &MysqlRepo{mysqlConn: db}, nil
 }
 
 func (m *MysqlRepo) SelectAll() ([]*domain.Candidate, error) {
@@ -30,8 +30,17 @@ func (m *MysqlRepo) SelectAll() ([]*domain.Candidate, error) {
 
 	candidates := make([]*domain.Candidate, 0)
 	for rows.Next() {
+		var created, interview string
 		candidate := new(domain.Candidate)
-		err = rows.Scan(&candidate.ID, &candidate.Created, &candidate.Name, &candidate.LastName, &candidate.Interview, &candidate.Description)
+		err = rows.Scan(&candidate.ID, &created, &candidate.Name, &candidate.LastName, &interview, &candidate.Description)
+		if err != nil {
+			return nil, err
+		}
+		candidate.Created, err = time.Parse("2006-01-02 15:04:05", created)
+		if err != nil {
+			return nil, err
+		}
+		candidate.Interview, err = time.Parse("2006-01-02 15:04:05", interview)
 		if err != nil {
 			return nil, err
 		}
@@ -41,20 +50,26 @@ func (m *MysqlRepo) SelectAll() ([]*domain.Candidate, error) {
 	return candidates, nil
 }
 
-
-func (m *MysqlRepo) SelectByID(id uint) (*domain.Candidate, error) {
+func (m *MysqlRepo) SelectByID(id uint64) (*domain.Candidate, error) {
 	query := "SELECT id, created, name, lastname, interview, description FROM candidate WHERE id = ?"
 	candidate := new(domain.Candidate)
-
-	err := m.mysqlConn.QueryRow(query, id).Scan(&candidate.ID, &candidate.Created, &candidate.Name, &candidate.LastName, &candidate.Interview, &candidate.Description)
+	var created, interview string
+	err := m.mysqlConn.QueryRow(query, id).Scan(&candidate.ID, &created, &candidate.Name, &candidate.LastName, &interview, &candidate.Description)
 	if err != nil {
 		return nil, err
 	}
-
+	candidate.Created, err = time.Parse("2006-01-02 15:04:05", created)
+	if err != nil {
+		return nil, err
+	}
+	candidate.Interview, err = time.Parse("2006-01-02 15:04:05", interview)
+	if err != nil {
+		return nil, err
+	}
 	return candidate, nil
 }
 
-func (m *MysqlRepo) EditDescription(candidateID uint, desc string) error {
+func (m *MysqlRepo) EditDescription(candidateID uint64, desc string) error {
 	query := "UPDATE candidate SET description = ? WHERE id = ?"
 	stmt, err := m.mysqlConn.Prepare(query)
 	if err != nil {
@@ -66,7 +81,7 @@ func (m *MysqlRepo) EditDescription(candidateID uint, desc string) error {
 	return err
 }
 
-func (m *MysqlRepo) EditInterview(candidateID uint, newTime time.Time) error {
+func (m *MysqlRepo) EditInterview(candidateID uint64, newTime time.Time) error {
 	query := "UPDATE candidate SET interview = ? WHERE id = ?"
 	stmt, err := m.mysqlConn.Prepare(query)
 	if err != nil {
@@ -91,8 +106,8 @@ func (m *MysqlRepo) NewCandidate(candidate *domain.Candidate) error {
 	return err
 }
 
-func (m *MysqlRepo) DeleteCandidate(candidateID uint) error {
-	query := "DELETE FROM candidates WHERE id = ?"
+func (m *MysqlRepo) DeleteCandidate(candidateID uint64) error {
+	query := "DELETE FROM candidate WHERE id = ?"
 
 	stmt, err := m.mysqlConn.Prepare(query)
 	if err != nil {

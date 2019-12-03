@@ -15,11 +15,11 @@ func main() {
 
 	serverPort := flag.String("server port", ":8080", "working port")
 	cache := flag.Bool("cache", false, "use cache")
-	dbHost := flag.String("host", "127.0.0.1", "db host")
+	dbHost := flag.String("host", "db", "db host")
 	dbPort := flag.String("port", "3306", "db port")
 	dbUser := flag.String("user", "inDriver", "db user")
 	dbPass := flag.String("pass", "IsCool", "db pass")
-	dbName := flag.String("name", "interview", "db name")
+	dbName := flag.String("name", "interviews", "db name")
 	flag.Parse()
 
 	var repo domain.Repository

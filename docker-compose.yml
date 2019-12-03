@@ -5,19 +5,27 @@ services:
     image: mysql:8.0
     container_name: db
     restart: unless-stopped
+    env_file:
+      - init/.env
     environment:
       - MYSQL_DATABASE=interview
-    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - ./init/init.sql:/data/application/init.sql
+    command: '--default-authentication-plugin=mysql_native_password --init-file /data/application/init.sql'
     networks:
       - app-network
+    ports:
+      - '3306:3306'
 
   server:
-    build: ./service-indriver
+    build: ./
     restart: on-failure
     ports:
       - '8080:8080'
     networks:
       - app-network
+    links:
+      - db:db
 
 networks:
   app-network:

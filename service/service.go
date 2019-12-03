@@ -1,10 +1,8 @@
 package service
 
 import (
-	"encoding/json"
 	"github.com/hurtuh/indriver/domain"
 	"log"
-	"net/http"
 	"time"
 )
 
@@ -13,20 +11,11 @@ type Logic struct {
 }
 
 func NewLogic(repository domain.Repository) *Logic {
-	return &Logic{repo:repository}
+	return &Logic{repo: repository}
 }
 
-func (l *Logic) NewCandidate(r *http.Request) (code int64, msg error, result interface{}) {
-	candidate := new(domain.Candidate)
+func (l *Logic) NewCandidate(candidate *domain.Candidate) (code int64, msg error, result interface{}) {
 	var err error
-
-	defer r.Body.Close()
-
-	if err := json.NewDecoder(r.Body).Decode(&candidate); err != nil {
-		msg = domain.ErrorWithUnmarshal
-		code = domain.CodeBadRequest
-		return
-	}
 
 	if err = l.repo.NewCandidate(candidate); err != nil {
 		log.Printf("Error with save new candidate, %v", candidate)
@@ -37,28 +26,19 @@ func (l *Logic) NewCandidate(r *http.Request) (code int64, msg error, result int
 
 	code = domain.CodeSuccess
 	result = struct {
-		result string
-	}{result:"success"}
+		result string `json:"result"`
+	}{result: "success"}
 
 	return
 }
 
-func (l *Logic) EditCandidate(r *http.Request) (code int64, msg error, result interface{}) {
-	editCandReq := new(domain.EditCandidateReq)
+func (l *Logic) EditCandidate(req *domain.EditCandidateReq) (code int64, msg error, result interface{}) {
 	var err error
 
-	defer r.Body.Close()
-
-	if err := json.NewDecoder(r.Body).Decode(&editCandReq); err != nil {
-		msg = domain.ErrorWithUnmarshal
-		code = domain.CodeBadRequest
-		return
-	}
-
-	if editCandReq.Description != "" {
-		err = l.repo.EditDescription(editCandReq.CandidateID, editCandReq.Description)
+	if req.Description != "" {
+		err = l.repo.EditDescription(req.CandidateID, req.Description)
 		if err != nil {
-			log.Printf("Error with edit description candidate, %v", editCandReq)
+			log.Printf("Error with edit description candidate, %v, err: %s", req, err)
 			msg = domain.ErrorWithDatabase
 			code = domain.CodeDatabaseError
 			return
@@ -67,10 +47,10 @@ func (l *Logic) EditCandidate(r *http.Request) (code int64, msg error, result in
 
 	zeroTime := time.Time{}
 
-	if editCandReq.NewTime != zeroTime {
-		err = l.repo.EditInterview(editCandReq.CandidateID, editCandReq.NewTime)
+	if req.NewTime != zeroTime {
+		err = l.repo.EditInterview(req.CandidateID, req.NewTime)
 		if err != nil {
-			log.Printf("Error with edit interview candidate, %v", editCandReq)
+			log.Printf("Error with edit interview candidate, %v, err: %s", req, err)
 			msg = domain.ErrorWithDatabase
 			code = domain.CodeDatabaseError
 			return
@@ -79,26 +59,16 @@ func (l *Logic) EditCandidate(r *http.Request) (code int64, msg error, result in
 
 	code = domain.CodeSuccess
 	result = struct {
-		result string
-	}{result:"success"}
+		result string `json:"result"`
+	}{result: "success"}
 
 	return
 }
 
-func (l *Logic) DeleteCandidate(r *http.Request) (code int64, msg error, result interface{}) {
-	delCandReq := new(domain.DeleteCandidateReq)
+func (l *Logic) DeleteCandidate(req *domain.DeleteCandidateReq) (code int64, msg error, result interface{}) {
 	var err error
-
-	defer r.Body.Close()
-
-	if err = json.NewDecoder(r.Body).Decode(&delCandReq); err != nil {
-		msg = domain.ErrorWithUnmarshal
-		code = domain.CodeBadRequest
-		return
-	}
-
-	if err = l.repo.DeleteCandidate(delCandReq.CandidateID); err != nil {
-		log.Printf("Error with delete candidate, %v", delCandReq)
+	if err = l.repo.DeleteCandidate(req.CandidateID); err != nil {
+		log.Printf("Error with delete candidate, %v, err: %s", req, err)
 		msg = domain.ErrorWithDatabase
 		code = domain.CodeDatabaseError
 		return
@@ -106,28 +76,19 @@ func (l *Logic) DeleteCandidate(r *http.Request) (code int64, msg error, result 
 
 	code = domain.CodeSuccess
 	result = struct {
-		result string
-	}{result:"success"}
+		result string `json:"result"`
+	}{result: "success"}
 
 	return
 }
 
-func (l *Logic) GetCandidate(r *http.Request) (code int64, msg error, result interface{}) {
-	getCandidateReq := new(domain.GetCandidateReq)
+func (l *Logic) GetCandidate(req *domain.GetCandidateReq) (code int64, msg error, result interface{}) {
 	var err error
 
-	defer r.Body.Close()
-
-	if err = json.NewDecoder(r.Body).Decode(&getCandidateReq); err != nil {
-		msg = domain.ErrorWithUnmarshal
-		code = domain.CodeBadRequest
-		return
-	}
-
-	if getCandidateReq.CandidateID != 0 {
-		result, err = l.repo.SelectByID(getCandidateReq.CandidateID)
+	if req.CandidateID != 0 {
+		result, err = l.repo.SelectByID(req.CandidateID)
 		if err != nil {
-			log.Printf("Error with get candidate, %v", getCandidateReq)
+			log.Printf("Error with get candidate, %v, err: %s", req, err)
 			msg = domain.ErrorWithDatabase
 			code = domain.CodeDatabaseError
 		}
@@ -136,7 +97,7 @@ func (l *Logic) GetCandidate(r *http.Request) (code int64, msg error, result int
 
 	result, err = l.repo.SelectAll()
 	if err != nil {
-		log.Printf("Error with get candidate, %v", getCandidateReq)
+		log.Printf("Error with get candidate, %v, err: %s", req, err)
 		msg = domain.ErrorWithDatabase
 		code = domain.CodeDatabaseError
 	}
