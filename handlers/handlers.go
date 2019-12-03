@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/hurtuh/indriver/domain"
 	"net/http"
 	"strconv"
@@ -29,7 +28,6 @@ func ApiResponse(w http.ResponseWriter, code int64, msg error, response interfac
 		resp.Message = msg.Error()
 	}
 	json.NewEncoder(w).Encode(resp)
-	fmt.Println(resp)
 }
 
 func (h *Handlers) AddRecord(w http.ResponseWriter, r *http.Request) {

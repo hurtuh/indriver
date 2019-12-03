@@ -26,8 +26,8 @@ func (l *Logic) NewCandidate(candidate *domain.Candidate) (code int64, msg error
 
 	code = domain.CodeSuccess
 	result = struct {
-		result string `json:"result"`
-	}{result: "success"}
+		Result string `json:"result"`
+	}{Result: "success"}
 
 	return
 }
@@ -59,8 +59,8 @@ func (l *Logic) EditCandidate(req *domain.EditCandidateReq) (code int64, msg err
 
 	code = domain.CodeSuccess
 	result = struct {
-		result string `json:"result"`
-	}{result: "success"}
+		Result string `json:"result"`
+	}{Result: "success"}
 
 	return
 }
@@ -76,8 +76,8 @@ func (l *Logic) DeleteCandidate(req *domain.DeleteCandidateReq) (code int64, msg
 
 	code = domain.CodeSuccess
 	result = struct {
-		result string `json:"result"`
-	}{result: "success"}
+		Result string `json:"result"`
+	}{Result: "success"}
 
 	return
 }

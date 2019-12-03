@@ -77,7 +77,7 @@ func (m *MysqlRepo) EditDescription(candidateID uint64, desc string) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(query, desc, candidateID)
+	_, err = stmt.Exec(desc, candidateID)
 	return err
 }
 
@@ -89,7 +89,7 @@ func (m *MysqlRepo) EditInterview(candidateID uint64, newTime time.Time) error {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(query, newTime, candidateID)
+	_, err = stmt.Exec(newTime, candidateID)
 	return err
 }
 
