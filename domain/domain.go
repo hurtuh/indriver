@@ -57,9 +57,11 @@ const (
 	CodeSuccess = iota
 	CodeBadRequest
 	CodeDatabaseError
+	CodeNotFound
 )
 
 var (
 	ErrorWithDecoding = errors.New("error with unmarshal, please check request")
 	ErrorWithDatabase = errors.New("error with database, please contact developers")
+	ErrorNoFound      = errors.New("candidate not found")
 )
